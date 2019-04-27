@@ -16,7 +16,7 @@
     "axios": "^0.18.0"
   },
   "devDependencies": {
-    "@azure/functions": "^1.0.1-beta2",
+    "@azure/functions": "^1.0.3",
     "typescript": "^3.3.3"
   }
 }
