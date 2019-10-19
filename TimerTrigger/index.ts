@@ -10,8 +10,10 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     let devices = await NatureRemoDevice.getDevicesData();
     context.log(devices);
-    let d = await MackerelAPI.postServiceMetric(devices[0]);
-    context.log(d);
+    for (const device of devices) {
+        let d = await MackerelAPI.postServiceMetric(device);
+        context.log(d);
+    }
 
     context.log('Timer trigger function ran!', timeStamp);
 };
@@ -31,7 +33,6 @@ class MackerelAPI {
     static async postServiceMetric(remoDevice: NatureRemoDevice) {
         // UNIX タイムスタンプ(秒)を取得
         const now = Math.floor(new Date().getTime() / 1000);
-        
         const { data } = await MackerelAPI.api.post(
             `https://mackerel.io/api/v0/services/${MackerelAPI.SERVICENAME}/tsdb`,
             [
@@ -52,8 +53,13 @@ class MackerelAPI {
                     name: `${remoDevice.id}.hu`,
                     time: now,
                     value: remoDevice.hu
-                }
-
+                },
+                // 人感
+                {
+                    name: `${remoDevice.id}.mo`,
+                    time: now,
+                    value: remoDevice.mo
+                },
             ]
         );
         return data;
@@ -70,6 +76,7 @@ class NatureRemoAPI {
         }
     });
 }
+
 class NatureRemoDevice {
     public static async getDevicesData() {
 
@@ -79,15 +86,23 @@ class NatureRemoDevice {
 
         // 複数デバイスへの対応のため、データでループ
         for (const device of data) {
-            let { hu, il, te } = device["newest_events"];
-            const remoDevice = new NatureRemoDevice(device["id"], device["name"], hu["val"], il["val"], te["val"]);
+            console.log(device);
+            let { hu, il, te, mo } = device["newest_events"];
+            // 人感センサーの場合は crated_at で判別
+            let mo_remo_date = Date.parse(mo["created_at"]);
+            // - 1 分以上前の場合は 0 とする
+            // - ミリ秒のため、1000 ms / 60 sec = 経過分を出す
+            if ((new Date().getTime() - mo_remo_date) / 1000 / 60 > 1) {
+                mo["val"] = 0;
+            }
+            const remoDevice = new NatureRemoDevice(device["id"], device["name"], hu["val"], il["val"], te["val"], mo["val"]);
             remoDevices.push(remoDevice);
         }
 
         return remoDevices;
     }
 
-    constructor(public id: string, public name: string, public hu: number, public il: number, public te: number) {
+    constructor(public id: string, public name: string, public hu: number, public il: number, public te: number, public mo: number) {
     }
 
 }
