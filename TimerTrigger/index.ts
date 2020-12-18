@@ -87,6 +87,10 @@ class NatureRemoDevice {
         // 複数デバイスへの対応のため、データでループ
         for (const device of data) {
             console.log(device);
+            if(typeof device["newest_events"] === undefined ||
+             Object.keys(device["newest_events"]).length === 0) {
+                continue;
+            }
             let { hu, il, te, mo } = device["newest_events"];
             // 人感センサーの場合は crated_at で判別
             let mo_remo_date = Date.parse(mo["created_at"]);

@@ -7,7 +7,7 @@
     "watch": "tsc -w",
     "prestart": "npm run build && func extensions install",
     "start:host": "func start",
-    "start": "npm run start:host & npm run watch",
+    "start": "npm-run-all --parallel start:host watch",
     "build:production": "npm run prestart && npm prune --production",
     "test": "echo \"No tests yet...\""
   },
@@ -16,7 +16,8 @@
     "axios": "^0.18.1"
   },
   "devDependencies": {
-    "@azure/functions": "^1.0.3",
+    "@azure/functions": "^1.0.1-beta1",
+    "npm-run-all": "^4.1.5",
     "typescript": "^3.3.3"
   }
 }
