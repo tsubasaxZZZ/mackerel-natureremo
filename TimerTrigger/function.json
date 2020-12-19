@@ -5,6 +5,13 @@
       "type": "timerTrigger",
       "direction": "in",
       "schedule": "0 */1 * * * *"
+    },
+    {
+      "type": "eventHub",
+      "name": "outputEventHubMessage",
+      "eventHubName": "",
+      "connection": "EventHubConnectionString",
+      "direction": "out"
     }
   ],
   "scriptFile": "../dist/TimerTrigger/index.js"

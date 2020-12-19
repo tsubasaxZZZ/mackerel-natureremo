@@ -10,6 +10,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     let devices = await NatureRemoDevice.getDevicesData();
     context.log(devices);
+    context.bindings.outputEventHubMessage = devices;
     for (const device of devices) {
         let d = await MackerelAPI.postServiceMetric(device);
         context.log(d);
@@ -87,8 +88,8 @@ class NatureRemoDevice {
         // 複数デバイスへの対応のため、データでループ
         for (const device of data) {
             console.log(device);
-            if(typeof device["newest_events"] === undefined ||
-             Object.keys(device["newest_events"]).length === 0) {
+            if (typeof device["newest_events"] === undefined ||
+                Object.keys(device["newest_events"]).length === 0) {
                 continue;
             }
             let { hu, il, te, mo } = device["newest_events"];
