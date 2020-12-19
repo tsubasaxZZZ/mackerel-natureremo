@@ -10,7 +10,10 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     let devices = await NatureRemoDevice.getDevicesData();
     context.log(devices);
-    context.bindings.outputEventHubMessage = devices;
+    // Event Hubs の設定がある場合のみ Event Hubs へデータ送信
+    if(process.env['EventHubConnectionString']) {
+        context.bindings.outputEventHubMessage = devices;
+    }
     for (const device of devices) {
         let d = await MackerelAPI.postServiceMetric(device);
         context.log(d);
